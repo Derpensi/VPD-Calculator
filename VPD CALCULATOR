@@ -1,0 +1,46 @@
+import streamlit as st
+
+# Funktion zur Berechnung des VPD
+def calculate_vpd(temp_c, rh):
+    svp = 6.1078 * 10 ** ((7.5 * temp_c) / (237.3 + temp_c))  # Sättigungsdampfdruck (hPa)
+    avp = (rh / 100) * svp  # Tatsächlicher Dampfdruck (hPa)
+    vpd = svp - avp  # VPD (hPa)
+    return round(vpd, 2)
+
+# Funktion zur Generierung der Tipps
+def vpd_tips(vpd):
+    if 8 <= vpd <= 12:
+        return "Der VPD liegt im optimalen Bereich. Keine Anpassung nötig!"
+    elif vpd < 8:
+        return "Der VPD ist zu niedrig. Erhöhe die Temperatur oder senke die Luftfeuchtigkeit!"
+    elif vpd > 12:
+        return "Der VPD ist zu hoch. Erhöhe die Luftfeuchtigkeit oder senke die Temperatur!"
+    else:
+        return "Ungewöhnlicher VPD-Wert. Überprüfe die Eingaben."
+
+# Streamlit-App
+st.title("VPD Rechner")
+
+# Eingabefelder
+temp_c = st.slider("Temperatur (°C)", min_value=10.0, max_value=40.0, value=22.1, step=0.1)
+rh = st.slider("Relative Luftfeuchtigkeit (%)", min_value=0, max_value=100, value=48, step=1)
+
+# VPD berechnen
+vpd = calculate_vpd(temp_c, rh)
+
+# Tipps anzeigen
+tips = vpd_tips(vpd)
+
+# Ergebnisse anzeigen
+st.write(f"VPD: {vpd} hPa")
+st.write(f"Empfohlene Anpassung: {tips}")
+
+# Diagramm anzeigen
+st.write("## Diagramm")
+fig, ax = plt.subplots()
+ax.plot([temp_c], [vpd], 'ro', label=f'VPD bei {temp_c}°C und {rh}% RH')
+ax.set_xlabel('Temperatur (°C)')
+ax.set_ylabel('VPD (hPa)')
+ax.set_title('VPD vs. Temperatur')
+ax.legend()
+st.pyplot(fig)
